@@ -1,73 +1,45 @@
-# React + TypeScript + Vite
+# 工程伦理密室逃脱 (Engineering Ethics Escape Room)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+一个像素复古风格的网页密室逃脱游戏，涵盖《工程伦理》课程全部 7 章知识点。玩家在 7 个密室中探索走动，通过答题、解谜、情景判断等方式逐一通关。
 
-Currently, two official plugins are available:
+## 技术栈
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 19** + **TypeScript 5.9** — UI框架与类型安全
+- **Vite 7** + SWC — 快速构建与热更新
+- **Tailwind CSS 4** — 设计令牌（颜色、字体变量）
+- **styled-components 6** — 组件级样式封装
+- **react-router 7** — 页面路由
+- **motion 12** — 动画库
 
-## React Compiler
+## 开发
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install       # 安装依赖
+npm run dev       # 启动开发服务器
+npm run build     # 构建生产版本
+npm run lint      # ESLint 检查
+npm run preview   # 预览生产构建
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Git 提交时自动运行 `lint-staged` → `eslint --fix`。
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 项目结构
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── types/game.ts          # TypeScript 类型（谜题、房间、状态）
+├── data/                   # 游戏数据（7房间谜题、成就）
+├── views/                  # 页面组件（路由对应）
+├── components/
+│   ├── room/               # 密室相关组件（场景、答题点、出口门、入口）
+│   ├── character/          # 角色精灵与移动 Hook
+│   └── effects/            # 像素粒子背景
+└── index.css               # 全局设计令牌 + 动画 + 工具类
+```
+
+## 文档
+
+- `docs/游戏设计文档.md` — 完整游戏设计（7个密室、24个谜题、评分系统）
+- `docs/风格指南.md` — 视觉风格指南（配色、字体、动画规范）
+- `docs/页面布局设计.md` — 各页面 ASCII 布局图与流转关系
+- `docs/学习通课程/` — 课程资料（20个知识点文件）

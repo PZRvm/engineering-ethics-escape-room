@@ -75,7 +75,7 @@ export const room1Puzzles: Puzzle[] = [
     score: 10,
     data: {
       type: 'drag-sort',
-      items: ['Byte', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB'],
+      items: ['PB', 'Byte', 'TB', 'GB', 'KB', 'EB', 'ZB', 'MB'],
       correctOrder: ['Byte', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB'],
     },
     explanation:

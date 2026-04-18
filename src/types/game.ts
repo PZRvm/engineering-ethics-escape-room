@@ -39,7 +39,6 @@ export interface PasswordLockData {
   type: 'password-lock'
   clue: string
   answer: string | number
-  hint: string
 }
 
 /** 情景判断题数据 */
