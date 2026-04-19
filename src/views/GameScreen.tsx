@@ -164,6 +164,12 @@ function PuzzleContent({
 
 // ==================== 组件 ====================
 
+function formatTime(sec: number) {
+  const m = String(Math.floor(sec / 60)).padStart(2, '0')
+  const s = String(sec % 60).padStart(2, '0')
+  return `${m}:${s}`
+}
+
 type Phase = 'entrance' | 'exploring' | 'cleared'
 
 export default function GameScreen() {
@@ -179,6 +185,9 @@ export default function GameScreen() {
     return statuses
   })
   const [totalScore, setTotalScore] = useState(0)
+  const [elapsed, setElapsed] = useState(0) // 秒
+  const startTimeRef = useRef<number | null>(null)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // 答题弹窗状态
   const [activePuzzleId, setActivePuzzleId] = useState<string | null>(null)
@@ -195,6 +204,20 @@ export default function GameScreen() {
   const room = rooms[currentRoomIndex]
   const character = useCharacter(room.layout.entryPosition)
   const activePuzzle = activePuzzleId ? room.puzzles.find(p => p.id === activePuzzleId) : null
+
+  // ===== 计时器 =====
+  useEffect(() => {
+    if (phase !== 'exploring') return
+    if (startTimeRef.current === null) {
+      startTimeRef.current = Date.now()
+    }
+    timerRef.current = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startTimeRef.current!) / 1000))
+    }, 1000)
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [phase])
 
   // ===== 进入密室 =====
   const handleEnter = useCallback(() => {
@@ -341,7 +364,7 @@ export default function GameScreen() {
           </div>
           <div className="header-right">
             <span className="score">⭐ {totalScore}</span>
-            <span className="timer">⏱ --:--</span>
+            <span className="timer">⏱ {formatTime(elapsed)}</span>
           </div>
         </header>
       )}
