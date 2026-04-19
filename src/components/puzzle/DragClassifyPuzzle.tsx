@@ -1,4 +1,4 @@
-import { useState, useCallback, forwardRef, useImperativeHandle } from 'react'
+import { useState, useCallback, forwardRef, useImperativeHandle, useEffect } from 'react'
 import styled, { keyframes } from 'styled-components'
 import type { DragClassifyData } from '../../types/game'
 
@@ -14,6 +14,7 @@ export interface DragClassifyHandle {
 interface DragClassifyPuzzleProps {
   data: DragClassifyData
   disabled: boolean
+  correct?: boolean
   onAnswer: (isCorrect: boolean) => void
 }
 
@@ -27,7 +28,7 @@ const blinkCursor = keyframes`
 // ==================== Component ====================
 
 const DragClassifyPuzzle = forwardRef<DragClassifyHandle, DragClassifyPuzzleProps>(
-  function DragClassifyPuzzle({ data, disabled, onAnswer }, ref) {
+  function DragClassifyPuzzle({ data, disabled, correct, onAnswer }, ref) {
     // assignments maps item text -> assigned category (or undefined = in pool)
     const [assignments, setAssignments] = useState<Record<string, string | undefined>>(() => {
       const initial: Record<string, string | undefined> = {}
@@ -37,6 +38,18 @@ const DragClassifyPuzzle = forwardRef<DragClassifyHandle, DragClassifyPuzzleProp
       return initial
     })
     const [selectedItem, setSelectedItem] = useState<string | null>(null)
+
+    // 答对后 key 变化导致组件重新挂载，此时 correct=true，直接显示正确分类
+    useEffect(() => {
+      if (correct) {
+        const correctAssignments: Record<string, string | undefined> = {}
+        for (const item of data.items) {
+          correctAssignments[item.text] = item.category
+        }
+        setAssignments(correctAssignments)
+        setSelectedItem(null)
+      }
+    }, [correct, data.items])
 
     useImperativeHandle(ref, () => ({
       check: () => {
@@ -104,7 +117,7 @@ const DragClassifyPuzzle = forwardRef<DragClassifyHandle, DragClassifyPuzzleProp
     const allAssigned = data.items.every(item => assignments[item.text] !== undefined)
 
     return (
-      <Wrapper $disabled={disabled}>
+      <Wrapper $disabled={disabled} $correct={!!correct}>
         <div className="instruction">
           {selectedItem !== null
             ? `已选择: "${selectedItem}" -- 点击下方分类区域放入`
@@ -192,11 +205,11 @@ export default DragClassifyPuzzle
 
 // ==================== Styles ====================
 
-const Wrapper = styled.div<{ $disabled: boolean }>`
+const Wrapper = styled.div<{ $disabled: boolean; $correct: boolean }>`
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  opacity: ${p => (p.$disabled ? 0.5 : 1)};
+  opacity: ${p => (p.$disabled && !p.$correct ? 0.5 : 1)};
   pointer-events: ${p => (p.$disabled ? 'none' : 'auto')};
 
   .instruction {

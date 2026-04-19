@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useState } from 'react'
+import { useEffect, forwardRef, useImperativeHandle, useState } from 'react'
 import styled from 'styled-components'
 import type { FillBlankData } from '../../types/game'
 
@@ -14,16 +14,24 @@ export interface FillBlankHandle {
 interface FillBlankPuzzleProps {
   data: FillBlankData
   disabled: boolean
+  correct?: boolean
   onAnswer: (isCorrect: boolean) => void
 }
 
 // ==================== Component ====================
 
 const FillBlankPuzzle = forwardRef<FillBlankHandle, FillBlankPuzzleProps>(
-  function FillBlankPuzzle({ data, disabled, onAnswer }, ref) {
+  function FillBlankPuzzle({ data, disabled, correct, onAnswer }, ref) {
     const [values, setValues] = useState<string[]>(() =>
       Array(data.blanks.length).fill(''),
     )
+
+    // 答对后 key 变化导致组件重新挂载，此时 correct=true，直接显示正确答案
+    useEffect(() => {
+      if (correct) {
+        setValues([...data.blanks])
+      }
+    }, [correct, data.blanks])
 
     useImperativeHandle(ref, () => ({
       check: () => {
@@ -52,7 +60,7 @@ const FillBlankPuzzle = forwardRef<FillBlankHandle, FillBlankPuzzleProps>(
     const parts = data.template.split('____')
 
     return (
-      <Wrapper $disabled={disabled}>
+      <Wrapper $disabled={disabled} $correct={!!correct}>
         <div className="question">{data.question}</div>
 
         <div className="template">
@@ -84,11 +92,11 @@ export default FillBlankPuzzle
 
 // ==================== Styles ====================
 
-const Wrapper = styled.div<{ $disabled: boolean }>`
+const Wrapper = styled.div<{ $disabled: boolean; $correct: boolean }>`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  opacity: ${p => (p.$disabled ? 0.5 : 1)};
+  opacity: ${p => (p.$disabled && !p.$correct ? 0.5 : 1)};
   pointer-events: ${p => (p.$disabled ? 'none' : 'auto')};
 
   .question {

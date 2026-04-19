@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import styled from 'styled-components'
 import type { PasswordLockData } from '../../types/game'
 
@@ -14,14 +14,21 @@ export interface PasswordLockHandle {
 interface PasswordLockPuzzleProps {
   data: PasswordLockData
   disabled: boolean
+  correct?: boolean
   onAnswer: (isCorrect: boolean) => void
 }
 
 // ==================== Component ====================
 
 const PasswordLockPuzzle = forwardRef<PasswordLockHandle, PasswordLockPuzzleProps>(
-  function PasswordLockPuzzle({ data, disabled, onAnswer }, ref) {
+  function PasswordLockPuzzle({ data, disabled, correct, onAnswer }, ref) {
     const [input, setInput] = useState('')
+    // 答对后 key 变化导致组件重新挂载，此时 correct=true，直接显示正确答案
+    useEffect(() => {
+      if (correct) {
+        setInput(String(data.answer))
+      }
+    }, [correct, data.answer])
     const MAX_INPUT_LEN = 20
     // 如果答案不是纯数字，使用文本输入框（支持中文等非数字答案）
     const isNumericAnswer = /^\d+$/.test(String(data.answer))
@@ -61,7 +68,7 @@ const PasswordLockPuzzle = forwardRef<PasswordLockHandle, PasswordLockPuzzleProp
     ]
 
     return (
-      <Wrapper $disabled={disabled}>
+      <Wrapper $disabled={disabled} $correct={!!correct}>
         <div className="clue">{data.clue}</div>
 
         {isNumericAnswer ? (
@@ -130,11 +137,11 @@ export default PasswordLockPuzzle
 
 // ==================== Styles ====================
 
-const Wrapper = styled.div<{ $disabled: boolean }>`
+const Wrapper = styled.div<{ $disabled: boolean; $correct: boolean }>`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  opacity: ${p => (p.$disabled ? 0.5 : 1)};
+  opacity: ${p => (p.$disabled && !p.$correct ? 0.5 : 1)};
   pointer-events: ${p => (p.$disabled ? 'none' : 'auto')};
 
   .clue {

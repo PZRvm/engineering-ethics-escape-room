@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import styled from 'styled-components'
 import type { MultipleChoiceData } from '../../types/game'
 
@@ -14,14 +14,23 @@ export interface MultipleChoiceHandle {
 interface MultipleChoicePuzzleProps {
   data: MultipleChoiceData
   disabled: boolean
+  correct?: boolean
   onAnswer: (isCorrect: boolean) => void
 }
 
 // ==================== Component ====================
 
 const MultipleChoicePuzzle = forwardRef<MultipleChoiceHandle, MultipleChoicePuzzleProps>(
-  function MultipleChoicePuzzle({ data, disabled, onAnswer }, ref) {
+  function MultipleChoicePuzzle({ data, disabled, correct, onAnswer }, ref) {
     const [selectedLabels, setSelectedLabels] = useState<Set<string>>(new Set())
+
+    // 答对后 key 变化导致组件重新挂载，此时 correct=true，直接显示正确选项
+    useEffect(() => {
+      if (correct) {
+        const correctLabels = data.options.filter(o => o.correct).map(o => o.label)
+        setSelectedLabels(new Set(correctLabels))
+      }
+    }, [correct, data.options])
 
     useImperativeHandle(ref, () => ({
       check: () => {
@@ -69,7 +78,7 @@ const MultipleChoicePuzzle = forwardRef<MultipleChoiceHandle, MultipleChoicePuzz
     }
 
     return (
-      <Wrapper $disabled={disabled}>
+      <Wrapper $disabled={disabled} $correct={!!correct}>
         <div className="question">
           {data.question}
           {data.multiSelect && (
@@ -103,11 +112,11 @@ export default MultipleChoicePuzzle
 
 // ==================== Styles ====================
 
-const Wrapper = styled.div<{ $disabled: boolean }>`
+const Wrapper = styled.div<{ $disabled: boolean; $correct: boolean }>`
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  opacity: ${p => (p.$disabled ? 0.5 : 1)};
+  opacity: ${p => (p.$disabled && !p.$correct ? 0.5 : 1)};
   pointer-events: ${p => (p.$disabled ? 'none' : 'auto')};
 
   .question {

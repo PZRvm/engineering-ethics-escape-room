@@ -138,25 +138,27 @@ type PuzzleHandle = DragSortHandle | DragClassifyHandle | MultipleChoiceHandle |
 function PuzzleContent({
   puzzle,
   disabled,
+  correct,
   ref_,
 }: {
   puzzle: Puzzle
   disabled: boolean
+  correct: boolean
   ref_: React.RefObject<PuzzleHandle | null>
 }) {
   switch (puzzle.data.type) {
     case 'drag-sort':
-      return <DragSortPuzzle ref={ref_ as React.RefObject<DragSortHandle | null>} data={puzzle.data as DragSortData} disabled={disabled} onAnswer={() => {}} />
+      return <DragSortPuzzle ref={ref_ as React.RefObject<DragSortHandle | null>} data={puzzle.data as DragSortData} disabled={disabled} correct={correct} onAnswer={() => {}} />
     case 'drag-classify':
-      return <DragClassifyPuzzle ref={ref_ as React.RefObject<DragClassifyHandle | null>} data={puzzle.data as DragClassifyData} disabled={disabled} onAnswer={() => {}} />
+      return <DragClassifyPuzzle ref={ref_ as React.RefObject<DragClassifyHandle | null>} data={puzzle.data as DragClassifyData} disabled={disabled} correct={correct} onAnswer={() => {}} />
     case 'multiple-choice':
-      return <MultipleChoicePuzzle ref={ref_ as React.RefObject<MultipleChoiceHandle | null>} data={puzzle.data as MultipleChoiceData} disabled={disabled} onAnswer={() => {}} />
+      return <MultipleChoicePuzzle ref={ref_ as React.RefObject<MultipleChoiceHandle | null>} data={puzzle.data as MultipleChoiceData} disabled={disabled} correct={correct} onAnswer={() => {}} />
     case 'scenario':
-      return <ScenarioPuzzle ref={ref_ as React.RefObject<ScenarioHandle | null>} data={puzzle.data as ScenarioData} disabled={disabled} onAnswer={() => {}} />
+      return <ScenarioPuzzle ref={ref_ as React.RefObject<ScenarioHandle | null>} data={puzzle.data as ScenarioData} disabled={disabled} correct={correct} onAnswer={() => {}} />
     case 'password-lock':
-      return <PasswordLockPuzzle ref={ref_ as React.RefObject<PasswordLockHandle | null>} data={puzzle.data as PasswordLockData} disabled={disabled} onAnswer={() => {}} />
+      return <PasswordLockPuzzle ref={ref_ as React.RefObject<PasswordLockHandle | null>} data={puzzle.data as PasswordLockData} disabled={disabled} correct={correct} onAnswer={() => {}} />
     case 'fill-blank':
-      return <FillBlankPuzzle ref={ref_ as React.RefObject<FillBlankHandle | null>} data={puzzle.data as FillBlankData} disabled={disabled} onAnswer={() => {}} />
+      return <FillBlankPuzzle ref={ref_ as React.RefObject<FillBlankHandle | null>} data={puzzle.data as FillBlankData} disabled={disabled} correct={correct} onAnswer={() => {}} />
     default:
       return null
   }
@@ -409,6 +411,7 @@ export default function GameScreen() {
           <PuzzleContent
             puzzle={activePuzzle}
             disabled={puzzleResult !== 'none'}
+            correct={puzzleResult === 'correct'}
             ref_={puzzleRef}
           />
         </PuzzleShell>

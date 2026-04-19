@@ -1,4 +1,4 @@
-import { useState, useCallback, forwardRef, useImperativeHandle } from 'react'
+import { useState, useCallback, forwardRef, useImperativeHandle, useEffect } from 'react'
 import styled from 'styled-components'
 import type { DragSortData } from '../../types/game'
 
@@ -15,23 +15,37 @@ export interface DragSortHandle {
 interface DragSortPuzzleProps {
   data: DragSortData
   disabled: boolean
+  correct?: boolean
   onAnswer: (isCorrect: boolean) => void
 }
 
 // ==================== Component ====================
 
 const DragSortPuzzle = forwardRef<DragSortHandle, DragSortPuzzleProps>(
-  function DragSortPuzzle({ data, disabled, onAnswer }, ref) {
+  function DragSortPuzzle({ data, disabled, correct, onAnswer }, ref) {
     const [currentOrder, setCurrentOrder] = useState<string[]>([...data.items])
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
+    // 答对后 key 变化导致组件重新挂载，此时 correct=true，直接显示正确顺序
+    useEffect(() => {
+      if (correct) {
+        setCurrentOrder([...data.correctOrder])
+        setSelectedIndex(null)
+      }
+    }, [correct, data.correctOrder])
+
     useImperativeHandle(ref, () => ({
       check: () => {
-        const correct =
+        const isCorrect =
           currentOrder.length === data.correctOrder.length &&
           currentOrder.every((item, i) => item === data.correctOrder[i])
-        onAnswer(correct)
-        return correct
+        onAnswer(isCorrect)
+        if (isCorrect) {
+          // 答对后按正确顺序显示
+          setCurrentOrder([...data.correctOrder])
+          setSelectedIndex(null)
+        }
+        return isCorrect
       },
       getAnswers: () => [...currentOrder],
       reset: () => {
@@ -69,7 +83,7 @@ const DragSortPuzzle = forwardRef<DragSortHandle, DragSortPuzzleProps>(
     )
 
     return (
-      <Wrapper $disabled={disabled}>
+      <Wrapper $disabled={disabled} $correct={!!correct}>
         <div className="instruction">
           点击两个条目交换顺序，将它们排列为正确顺序
         </div>
@@ -99,8 +113,8 @@ export default DragSortPuzzle
 
 // ==================== Styles ====================
 
-const Wrapper = styled.div<{ $disabled: boolean }>`
-  opacity: ${p => (p.$disabled ? 0.5 : 1)};
+const Wrapper = styled.div<{ $disabled: boolean; $correct: boolean }>`
+  opacity: ${p => (p.$disabled && !p.$correct ? 0.5 : 1)};
   pointer-events: ${p => (p.$disabled ? 'none' : 'auto')};
   display: flex;
   flex-direction: column;
